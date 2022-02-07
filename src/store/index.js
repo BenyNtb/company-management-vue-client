@@ -44,7 +44,7 @@ export default new Vuex.Store({
   login: function ( {commit, dispatch}, value) {
 
     axios
-    .post('http://127.0.0.1:8000/api/login', value)
+    .post('http://192.168.1.53:8080/api/login', value)
     .then((res) => {
         commit('setToken', res.data.token);
         console.log(res.data);
@@ -54,7 +54,7 @@ export default new Vuex.Store({
   },
   async getUser({state, commit, dispatch}) {
 
-    await axios.get('http://127.0.0.1:8000/api/user', {
+    await axios.get('http://192.168.1.53:8080/api/user', {
       headers: {
       Authorization: "Bearer " + state.token
       }

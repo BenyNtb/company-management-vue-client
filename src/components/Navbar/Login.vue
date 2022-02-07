@@ -1,80 +1,87 @@
 <template>
-  <div
-    class="flex items-center justify-center w-full h-screen bg-gray-100 bg-opacity-25 max-w-screen z-20 absolute top-0 left-0"
-    @click="$emit('toggleLoginOverlay', false)"
-  >
-    <div class="w-full max-w-3xl overflow-hidden rounded-lg shadow-lg sm:flex z-50" @click.stop>
-      <div
-        class="w-full text-white bg-gray-700 bg-center bg-cover sm:w-2/5"
-        style="background-image: url('https://images.unsplash.com/photo-1504985954001-5737b2af529e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2879&q=80')"
-      ></div>
-      <div class="w-full bg-white sm:w-3/5">
-        <div class="p-8">
-          <h1 class="text-3xl font-black">Login</h1>
-          <p class="mt-2 mb-5 text-base leading-tight text-gray-600">
-            Connect to tour account to join our awesome
-            community
-          </p>
-          <form>
-            <label for="username" class="text-xs text-gray-500">Username</label>
-            <input
-              id="username"
-              class="block w-full rounded-md pb-1 m-auto mb-6 text-gray-700 bg-transparent border-b border-gray-500"
-              type="text"
-              placeholder
-            />
-            <label id="passowrd" class="text-xs text-gray-500">Password</label>
-            <input
-              id="password"
-              class="block w-full rounded-md pb-1 m-auto mb-6 bg-transparent border-b border-gray-500 text-grey-700"
-              type="password"
-              placeholder
-            />
-            <input
-              class="w-full rounded-md pt-3 pb-3 text-white bg-indigo-500 shadow-lg cursor-pointer hover:bg-indigo-400"
-              type="submit"
-              value="Login"
-            />
-          </form>
-          <div class="mt-4 text-center">
-            <p class="text-sm text-gray-600">
-              You do not have an account?
-              <span
-                href="#"
-                class="font-bold text-indigo-500 no-underline hover:text-indigo-400"
-              >Register here</span>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <v-row justify="center">
+    <v-dialog v-model="toggleOverlayLogin" persistent max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">User Profile</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  label="Email"
+                  v-model="email"
+                  type="email"
+                  required
+                  :rules="emailRules"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="password"
+                  :append-icon="isPasswordVisible == true ? 'mdi-eye-off' : 'mdi-eye'"
+                  :type="isPasswordVisible == true ? 'text' : 'password'"
+                  @click:append="isPasswordVisible = !isPasswordVisible"
+                  :rules="passwordRules"
+                  label="Password"
+                  hint="Greater than 10 characters and one character in upper case"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="$emit('toggleOverlayLogin', false)">Close</v-btn>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="login() ; $emit('toggleOverlayLogin', false)"
+          >Login</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-row>
 </template>
-
 <script>
+import axios from 'axios'
 export default {
-  name: "Login",
-        data: () => ({
-            show1: false,
-            valid: true,
-            emailRules: [
-            v => !!v || 'E-mail is required',
-            v => /.+@.+\..+/.test(v) || 'E-mail must be valid',
-                
-            ],
-            connexion: {
-                email:null,
-                password:null
-            }
+  props: {
+    toggleOverlayLogin: { type: Boolean }
+  },
+  name: 'LoginOverlay',
+  data: () => ({
+    isPasswordVisible: false,
+    email: null,
+    password: null,
+    passwordRules: [
+      v => (!!v && v.length > 5) || 'The password must be comported minimum 5 characters',
+      v => (v && v != v.toLowerCase()) || 'The password must be comported minimum one character in upper case',
+    ],
+    emailRules: [
+      v => (!!v && v.length > 5) || 'The email must be comported minimum 5 characters',
+      v => (v && v.indexOf('@') > 0) || 'The email must be comported @ character',
+    ],
+  }),
+  methods: {
+    login () {
+      let formData = new FormData;
+      formData.append('email', this.email)
+      formData.append('password', this.password)
+      formData.append('password_confirmation', this.password)
+      formData.append('confirmation_password', this.password)
 
-        }),
-
-        methods: {
-            connected() {
-                this.$store.dispatch('login', this.connexion)
-                this.$router.push({name:'Home'})
-            }
-        }
+      axios.get('/sanctum/csrf-cookie').then(() => {
+        axios.post('/api/v1/login', formData).then(res => {
+          localStorage.setItem('bearerToken', res.data.data.bearerToken);
+          localStorage.setItem('userId', res.data.data.user.id)
+          location.reload();
+        })
+      })
+    },
+  }
 }
 </script>
 
