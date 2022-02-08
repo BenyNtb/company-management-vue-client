@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
+import createPersistedState from "vuex-persistedstate";
 
 Vue.use(Vuex)
 
@@ -30,7 +31,7 @@ export default new Vuex.Store({
       state.tva = value
     },
     clearToken(state) {
-      state.user = null,
+      state.user = null;
       state.token= null
     },
     setMessage(state, value) {
@@ -42,9 +43,9 @@ export default new Vuex.Store({
   // L O G I N
 
   login: function ( {commit, dispatch}, value) {
-
+    console.log(value)
     axios
-    .post('http://192.168.1.53:8080/api/login', value)
+    .post('http://127.0.0.1:8000/api/login', value)
     .then((res) => {
         commit('setToken', res.data.token);
         console.log(res.data);
@@ -52,15 +53,17 @@ export default new Vuex.Store({
         })
     .catch(error => console.log(error))
   },
+  // CONNECTED USER
   async getUser({state, commit, dispatch}) {
 
-    await axios.get('http://192.168.1.53:8080/api/user', {
+    await axios.get('http://127.0.0.1:8000/api/user', {
       headers: {
       Authorization: "Bearer " + state.token
       }
       }).then((response) => {
           commit('setUser', response.data);
           dispatch('getEntreprise')
+          console.log(state.user)
       }) 
       .catch(error => console.log(error))
   },
@@ -69,7 +72,7 @@ export default new Vuex.Store({
 
   register: function({commit, dispatch}, value) {
     axios
-    .post('http://192.168.1.53:8080/api/register', value)
+    .post('http://127.0.0.1:8000/api/register', value)
     .then((res) => {
         commit('setToken', res.data.token);
         console.log(res.data);
@@ -82,7 +85,7 @@ export default new Vuex.Store({
 
   logout: function ( {commit, state}) {
     axios
-    .post('http://192.168.1.53:8080/api/logout', {}, {
+    .post('http://127.0.0.1:8000/api/logout', {}, {
       headers: {
         Authorization: "Bearer " + state.token
         }  
@@ -95,7 +98,7 @@ export default new Vuex.Store({
   },
   
   getEntreprise: function ( {commit, state}) {
-    axios.get('http://192.168.1.53:8080/api/entreprise', {
+    axios.get('http://127.0.0.1:8000/api/entreprise', {
       headers: {
       Authorization: "Bearer " + state.token
       }
@@ -106,7 +109,7 @@ export default new Vuex.Store({
       .catch(error => console.log(error))
   },
   editEntreprise: function ( {commit, state}, value) {
-    axios.put('http://192.168.1.53:8080/api/entreprise/update', value, {
+    axios.put('http://127.0.0.1:8000/api/entreprise/update', value, {
       headers: {
       Authorization: "Bearer " + state.token
       }
@@ -132,7 +135,7 @@ export default new Vuex.Store({
     .catch(error => console.log(error))
   }, 
   registerEntreprise: function ({state}, value) {
-    axios.post('http://192.168.1.53:8080/api/entreprise/store', value, {
+    axios.post('http://127.0.0.1:8000/api/entreprise/store', value, {
       headers: {
       Authorization: "Bearer " + state.token
       }}).then((response)=> {
@@ -142,7 +145,7 @@ export default new Vuex.Store({
   },
 
   getTask: function ( {commit, state}) {
-    axios.get('http://192.168.1.53:8080/api/task', {
+    axios.get('http://127.0.0.1:8000/api/task', {
       headers: {
       Authorization: "Bearer " + state.token
       }
@@ -153,7 +156,7 @@ export default new Vuex.Store({
       .catch(error => console.log(error))
   },
   updateTask: function({state, commit}, value) {
-    axios.put('http://192.168.1.53:8080/api/task/'+value, {}, {
+    axios.put('http://127.0.0.1:8000/api/task'+value, {}, {
       headers: {
       Authorization: "Bearer " + state.token
       }
@@ -166,5 +169,5 @@ export default new Vuex.Store({
   },
   modules: {
   },
-  // plugins: [createPersistedState()],
+  plugins: [createPersistedState()],
 })

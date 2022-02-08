@@ -10,15 +10,10 @@
         <v-spacer></v-spacer>
 
         <div class="text-center">
-          <v-btn @click="toggleOverlayRegister = true">
-            Register
-          </v-btn>
-          <v-btn @click="toggleOverlayLogin = true">Sign in</v-btn>
+          <v-btn>{{user.name}}</v-btn>
+          <v-btn v-if="token != null" @click="logout" class="mr-3">Logout</v-btn>
+          <v-btn v-if="token == null" href="/login">Sign in</v-btn>
         </div>
-        <Register :toggleOverlayRegister="toggleOverlayRegister" @toggleOverlayRegister="toggleOverlayRegister = false"
-          @registrationComplete="isConnected = true; getProfile()" />
-        <Login :toggleOverlayLogin="toggleOverlayLogin" @toggleOverlayLogin="toggleOverlayLogin = false"
-          @loginSuccess="getProfile()" />
       </v-app-bar>
     </div>
     <v-main>
@@ -28,22 +23,24 @@
 </template>
 
 <script>
-  import Login from './components/Navbar/Login.vue';
-  import Register from './components/Navbar/Register.vue'
+  import {
+    mapState
+  } from "vuex"
   export default {
-    components: {
-      Login,
-      Register
+    computed: {
+      ...mapState(['user', 'token'])
     },
-    name: 'App',
 
-    data() {
-      return {
-        toggleOverlayRegister: false,
-        toggleOverlayLogin: false,
-        isConnected: false,
-        // displayedModalRegister: false,
+    name: 'App',
+    methods: {
+      logout() {
+        this.$store.dispatch('logout');
+        this.$router.push({
+          name: "Home"
+        });
+
       }
-    }
+    },
+
   };
 </script>
